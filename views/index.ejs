@@ -1,0 +1,66 @@
+<%- include('partials/header') %>
+
+<div class="table-responsive">
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Marca</th>
+        <th>Año</th>
+        <th>Color</th>
+        <th>Memoria</th>
+        <th>Precio</th>
+        <th>Conectividad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% vehiculos.forEach(vehiculo => { %>
+      <tr>
+        <td><%= vehiculo.idvehiculo %></td>
+        <td><%= vehiculo.marca %></td>
+        <td><%= vehiculo.modelo %></td>
+        <td><%= vehiculo.color %></td>
+        <td><%= vehiculo.combustible %></td>
+        <td><%= vehiculo.afabricacion %></td>
+        <td><%= vehiculo.condicion %></td>
+        <td>
+          <a href="/edit/<%= vehiculo.idvehiculo %>" class="btn btn-sm btn-info">Editar</a>
+          <a href="/delete/<%= vehiculo.idvehiculo %>" class="btn btn-sm btn-danger delete">Eliminar</a>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const enlacesEliminar = document.querySelectorAll(".delete")
+
+    enlacesEliminar.forEach(enlace => {
+      enlace.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        Swal.fire({
+          title: 'Vehículos',
+          text: '¿Está seguro de eliminar?',
+          icon: 'question',
+          footer: 'SENATI - Ingeniería Software',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2980b9',
+          showCancelButton: true,
+          cancelButtonText: 'Cancelar',
+          cancelButtonColor: '#c0392b'
+        }).then((result) => {
+          if (result.isConfirmed){
+            window.location.href = event.target.getAttribute("href")
+          }
+        }); //then()
+      }); //addEventListener
+    }); //forEach
+
+  }); //DOMContentLoaded
+</script>
+
+<%- include('partials/footer') %>
