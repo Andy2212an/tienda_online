@@ -5,28 +5,30 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Nombre</th>
         <th>Marca</th>
-        <th>Año</th>
+        <th>Modelo</th>
         <th>Color</th>
-        <th>Memoria</th>
-        <th>Precio</th>
-        <th>Conectividad</th>
+        <th>Almacenamiento</th>
+        <th>RAM</th>
+        <th>Año</th>
+        <th>Estado</th>
+        <th>Operaciones</th>
       </tr>
     </thead>
     <tbody>
-      <% vehiculos.forEach(vehiculo => { %>
+      <% celulares.forEach(celular => { %>
       <tr>
-        <td><%= vehiculo.idvehiculo %></td>
-        <td><%= vehiculo.marca %></td>
-        <td><%= vehiculo.modelo %></td>
-        <td><%= vehiculo.color %></td>
-        <td><%= vehiculo.combustible %></td>
-        <td><%= vehiculo.afabricacion %></td>
-        <td><%= vehiculo.condicion %></td>
+        <td><%= celular.idcelular %></td>
+        <td><%= celular.marca %></td>
+        <td><%= celular.modelo %></td>
+        <td><%= celular.color %></td>
+        <td><%= celular.almacenamiento %></td>
+        <td><%= celular.ram %></td>
+        <td><%= celular.anio_lanzamiento %></td>
+        <td><%= celular.estado %></td>
         <td>
-          <a href="/edit/<%= vehiculo.idvehiculo %>" class="btn btn-sm btn-info">Editar</a>
-          <a href="/delete/<%= vehiculo.idvehiculo %>" class="btn btn-sm btn-danger delete">Eliminar</a>
+          <a href="/edit/<%= celular.idcelular %>" class="btn btn-sm btn-info">Editar</a>
+          <a href="/delete/<%= celular.idcelular %>" class="btn btn-sm btn-danger delete">Eliminar</a>
         </td>
       </tr>
       <% }) %>
@@ -43,7 +45,7 @@
         event.preventDefault();
 
         Swal.fire({
-          title: 'Vehículos',
+          title: 'Celulares',
           text: '¿Está seguro de eliminar?',
           icon: 'question',
           footer: 'SENATI - Ingeniería Software',
@@ -56,11 +58,10 @@
           if (result.isConfirmed){
             window.location.href = event.target.getAttribute("href")
           }
-        }); //then()
-      }); //addEventListener
-    }); //forEach
-
-  }); //DOMContentLoaded
+        });
+      });
+    });
+  });
 </script>
 
 <%- include('partials/footer') %>

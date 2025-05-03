@@ -1,29 +1,34 @@
-CREATE DATABASE tiendachincha;
-USE tiendachincha;
+CREATE DATABASE celularstore;
+USE celularstore;
 
-CREATE TABLE IF NOT EXISTS marcas_celulares (
-    idmarca INT AUTO_INCREMENT PRIMARY KEY,
-    marca VARCHAR(40) NOT NULL UNIQUE
+-- Tabla de marcas
+CREATE TABLE IF NOT EXISTS marcas (
+	idmarca 	INT AUTO_INCREMENT PRIMARY KEY,
+    marca 		VARCHAR(40) NOT NULL,
+    CONSTRAINT uk_marca UNIQUE (marca)
 ) ENGINE = INNODB;
 
+-- Tabla de celulares
 CREATE TABLE IF NOT EXISTS celulares (
-    idcelular INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,  -- Nombre del Celular
-    idmarca INT NOT NULL,
-    anyo INT NOT NULL,  -- Año
-    color VARCHAR(50) NOT NULL,  -- Color
-    memoria_interna ENUM('32GB', '64GB', '128GB', '256GB', '512GB', '1TB') NOT NULL, -- Memoria Interna / Capacidad
-    precio DECIMAL(10, 2) NOT NULL,  -- Precio
-    conectividad ENUM('4G', '5G') NOT NULL, -- Conectividad
-    CONSTRAINT fk_idmarca_cel FOREIGN KEY (idmarca) REFERENCES marcas_celulares (idmarca)
+	idcelular 		INT AUTO_INCREMENT PRIMARY KEY,
+    idmarca 		INT NOT NULL,
+    modelo 			VARCHAR(40) NOT NULL,
+    color 			VARCHAR(30) NOT NULL,
+    almacenamiento 	ENUM('64GB', '128GB', '256GB', '512GB'),
+    ram 			ENUM('4GB', '6GB', '8GB', '12GB'),
+    anio_lanzamiento CHAR(4) NOT NULL,
+    estado 			ENUM('Nuevo', 'Usado'),
+    CONSTRAINT fk_idmarca_cel FOREIGN KEY (idmarca) REFERENCES marcas (idmarca)
 ) ENGINE = INNODB;
 
--- Example data insertion (Remember to populate marcas_celulares first)
-INSERT INTO marcas_celulares (marca) VALUES
-('Samsung'), ('Xiaomi'), ('Apple');
+-- Insertar marcas
+INSERT INTO marcas (marca) VALUES 
+	('Samsung'),		-- 1
+    ('Apple'),			-- 2
+    ('Xiaomi');			-- 3
 
-INSERT INTO celulares (nombre, idmarca, anyo, color, memoria_interna, precio, conectividad) VALUES
-('Galaxy S23', 1, 2023, 'Negro', '256GB', 1000.00, '5G'),
-('iPhone 14', 3, 2022, 'Blanco', '128GB', 900.00, '5G'),
-('Xiaomi 13', 2, 2023, 'Azul', '128GB', 700.00, '5G');
-    
+-- Insertar celulares
+INSERT INTO celulares (idmarca, modelo, color, almacenamiento, ram, anio_lanzamiento, estado) VALUES
+	(1, 'Galaxy S22', 'Negro', '256GB', '8GB', '2023', 'Nuevo'),
+    (2, 'iPhone 13', 'Azul', '128GB', '6GB', '2022', 'Usado'),
+    (3, 'Redmi Note 12', 'Gris', '128GB', '6GB', '2024', 'Nuevo');

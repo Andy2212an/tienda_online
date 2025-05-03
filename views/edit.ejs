@@ -1,0 +1,116 @@
+<%- include('partials/header') %>
+
+<form action="/edit/<%= celular.idcelular %>" id="formulario-registro" autocomplete="off" method="post">
+  <div class="card mt-2">
+    <div class="card-header"><strong>Actualización de Celular</strong></div>
+
+    <div class="card-body">
+      
+      <div class="row g-2">
+        <div class="col-md-6 mb-2">
+          <div class="form-floating">
+            <select name="marcas" id="marcas" class="form-select" required>
+              <option value="" selected disabled>Seleccione</option>
+              <% marcas.forEach(element => { %>
+                <option value="<%= element.idmarca %>" <%= element.idmarca == celular.idmarca ? 'selected' : '' %>><%= element.marca %></option>
+              <% }) %>
+            </select>
+            <label for="form-label">Marca</label>
+          </div>
+        </div>
+        <div class="col-md-6 mb-2">
+          <div class="form-floating">
+            <input type="text" id="modelo" value="<%= celular.modelo %>" name="modelo" class="form-control" placeholder="Modelo" required>
+            <label for="form-label">Modelo</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-md-4 mb-2">
+          <div class="form-floating">
+            <input type="text" id="color" value="<%= celular.color %>" name="color" class="form-control" placeholder="Color" required>
+            <label for="form-label">Color</label>
+          </div>
+        </div>
+        <div class="col-md-4 mb-2">
+          <div class="form-floating">
+            <select name="almacenamiento" id="almacenamiento" class="form-select" required>
+              <option value="" disabled>Seleccione</option>
+              <option value="64GB" <%= celular.almacenamiento == '64GB' ? 'selected' : '' %> >64GB</option>
+              <option value="128GB" <%= celular.almacenamiento == '128GB' ? 'selected' : '' %> >128GB</option>
+              <option value="256GB" <%= celular.almacenamiento == '256GB' ? 'selected' : '' %> >256GB</option>
+              <option value="512GB" <%= celular.almacenamiento == '512GB' ? 'selected' : '' %> >512GB</option>
+            </select>
+            <label for="form-label">Almacenamiento</label>
+          </div>
+        </div>
+        <div class="col-md-4 mb-2">
+          <div class="form-floating">
+            <select name="ram" id="ram" class="form-select" required>
+              <option value="" disabled>Seleccione</option>
+              <option value="4GB" <%= celular.ram == '4GB' ? 'selected' : '' %> >4GB</option>
+              <option value="6GB" <%= celular.ram == '6GB' ? 'selected' : '' %> >6GB</option>
+              <option value="8GB" <%= celular.ram == '8GB' ? 'selected' : '' %> >8GB</option>
+              <option value="12GB" <%= celular.ram == '12GB' ? 'selected' : '' %> >12GB</option>
+            </select>
+            <label for="form-label">Memoria RAM</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-md-6 mb-2">
+          <div class="form-floating">
+            <input type="text" minlength="4" maxlength="4" pattern="[0-9]+" id="anio_lanzamiento" name="anio_lanzamiento" class="form-control" placeholder="Año de lanzamiento" value="<%= celular.anio_lanzamiento %>" required>
+            <label for="form-label">Año de lanzamiento</label>
+          </div>
+        </div>
+        <div class="col-md-6 mb-2">
+          <div class="form-floating">
+            <select name="estado" id="estado" class="form-select" required>
+              <option value="Nuevo" <%= celular.estado == 'Nuevo' ? 'selected' : '' %> >Nuevo</option>
+              <option value="Usado" <%= celular.estado == 'Usado' ? 'selected' : '' %> >Usado</option>
+            </select>
+            <label for="form-label">Estado</label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card-footer">
+      <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
+      <a href="/" class="btn btn-sm btn-secondary">Cancelar</a>
+    </div>
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const formulario = document.querySelector("#formulario-registro")
+
+    formulario.addEventListener("submit", (event) => {
+      event.preventDefault()
+
+      Swal.fire({
+        title: 'Celulares',
+        text: '¿Está seguro de actualizar este celular?',
+        icon: 'question',
+        footer: 'SENATI - Ingeniería Software',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2980b9',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        cancelButtonColor: '#c0392b'
+      }).then((result) => {
+        if (result.isConfirmed){
+          formulario.submit()
+        }
+      })
+
+    })
+  })
+</script>
+
+<%- include('partials/footer') %>
