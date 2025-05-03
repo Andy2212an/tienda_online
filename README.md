@@ -22,25 +22,27 @@ Este proyecto permite gestionar un inventario de celulares, incluyendo operacion
 ```bash
 tienda_online/
 │
-├── app.js              # Archivo principal del servidor
+├── app.js                          # Archivo principal del servidor
 ├── routes/
-│   └── celular.js      # Lógica de rutas y CRUD de celulares
+│   └── celular.js                  # Lógica de rutas y CRUD de celulares
 ├── views/
-│   ├── index.ejs       # Página principal (listado)
-│   ├── create.ejs      # Formulario de creación
-│   ├── edit.ejs        # Formulario de edición
-│   ├── home.ejs        # Página de bienvenida
-│   └── partials/       # Componentes parciales para la vista
-│       ├── header.ejs  # Encabezado de la página
-│       └── footer.ejs  # Pie de página
+│   ├── index.ejs                   # Página principal (listado)
+│   ├── create.ejs                  # Formulario de creación
+│   ├── edit.ejs                    # Formulario de edición
+│   ├── home.ejs                    # Página de bienvenida
+│   └── partials/                   # Componentes parciales para la vista
+│       ├── header.ejs              # Encabezado de la página
+│       └── footer.ejs              # Pie de página
 ├── public/
-│   └── uploads/        # Carpeta donde se guardan las imágenes
+│   └── uploads/                    # Carpeta donde se guardan las imágenes
 ├── config/
-│   ├── database.js     # Conexión a la base de datos
-│   └── scriptbd.sql    # Script para la creación de la base de datos
+│   ├── database.js                 # Conexión a la base de datos
+│   └── scriptbd.sql                # Script para la creación de la base de datos
 ├── test/
-│   └── arreglo.js      # Archivo de prueba
-└── README.md           # Este archivo de documentación        
+│   └── arreglo.js                  # Archivo de prueba
+├── README.md                       # Este archivo de documentación    
+└── formatoalumnotrabajofinal/ 
+    └── PIAD-527_FORMATOALUMNOTRABAJOFINAL.pdf   # Archivo de trabajo final
 ```
 ## 🛠️ Cómo ejecutar este proyecto en Visual Studio Code
 
