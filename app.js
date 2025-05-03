@@ -19,8 +19,13 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
-//Configuración rutas
-app.use('/', rutaCelular)          //Principal
+// Redirigir raíz a /celulares para evitar "Cannot GET /"
+app.get('/', (req, res) => {
+  res.redirect('/celulares');
+});
+
+//Configuración rutas con prefijo /celulares
+app.use('/celulares', rutaCelular)          // Principal
 //app.use('/api/marcas', rutaMarca)   //Suministrar datos
 
 //Servidor Web

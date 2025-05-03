@@ -1,6 +1,6 @@
 <%- include('partials/header') %>
 
-<form action="/create" id="formulario-registro" autocomplete="off" method="post" enctype="multipart/form-data">
+<form action="/celulares/create" id="formulario-registro" autocomplete="off" method="post" enctype="multipart/form-data">
   <div class="card mt-2">
     <div class="card-header"><strong>Registro de Celular</strong></div>
 
@@ -15,13 +15,13 @@
                 <option value="<%= element.idmarca %>"><%= element.marca %></option>
               <% }) %>
             </select>
-            <label for="form-label">Marca</label>
+            <label for="marcas">Marca</label>
           </div>
         </div>
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="text" id="modelo" name="modelo" class="form-control" placeholder="Modelo" required>
-            <label for="form-label">Modelo</label>
+            <label for="modelo">Modelo</label>
           </div>
         </div>
       </div>
@@ -30,7 +30,7 @@
         <div class="col-md-4 mb-2">
           <div class="form-floating">
             <input type="text" id="color" name="color" class="form-control" placeholder="Color" required>
-            <label for="form-label">Color</label>
+            <label for="color">Color</label>
           </div>
         </div>
         <div class="col-md-4 mb-2">
@@ -42,7 +42,7 @@
               <option value="256GB">256GB</option>
               <option value="512GB">512GB</option>
             </select>
-            <label for="form-label">Almacenamiento</label>
+            <label for="almacenamiento">Almacenamiento</label>
           </div>
         </div>
         <div class="col-md-4 mb-2">
@@ -54,7 +54,7 @@
               <option value="8GB">8GB</option>
               <option value="12GB">12GB</option>
             </select>
-            <label for="form-label">Memoria RAM</label>
+            <label for="ram">Memoria RAM</label>
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="text" minlength="4" maxlength="4" pattern="[0-9]+" id="anio_lanzamiento" name="anio_lanzamiento" class="form-control" placeholder="Año de lanzamiento" required>
-            <label for="form-label">Año de lanzamiento</label>
+            <label for="anio_lanzamiento">Año de lanzamiento</label>
           </div>
         </div>
         <div class="col-md-6 mb-2">
@@ -72,7 +72,7 @@
               <option value="Nuevo">Nuevo</option>
               <option value="Usado">Usado</option>
             </select>
-            <label for="form-label">Estado</label>
+            <label for="estado">Estado</label>
           </div>
         </div>
       </div>
@@ -82,7 +82,7 @@
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="number" step="0.01" id="precio" name="precio" class="form-control" placeholder="Precio" required>
-            <label for="form-label">Precio</label>
+            <label for="precio">Precio</label>
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="file" id="imagen" name="imagen" class="form-control" accept="image/*">
-            <label for="form-label">Imagen</label>
+            <label for="imagen">Imagen</label>
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@
 
     <div class="card-footer">
       <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
-      <a href="/" class="btn btn-sm btn-secondary">Cancelar</a>
+      <a href="/celulares" class="btn btn-sm btn-secondary">Cancelar</a>
     </div>
   </div>
 </form>
@@ -133,7 +133,5 @@
 </script>
 
 <%- include('partials/footer') %>
-
-
 
 

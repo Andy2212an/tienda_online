@@ -1,6 +1,6 @@
 <%- include('partials/header') %>
 
-<form action="/edit/<%= celular.idcelular %>" id="formulario-registro" autocomplete="off" method="post" enctype="multipart/form-data">
+<form action="/celulares/edit/<%= celular.idcelular %>" id="formulario-registro" autocomplete="off" method="post" enctype="multipart/form-data">
   <div class="card mt-2">
     <div class="card-header"><strong>Actualización de Celular</strong></div>
 
@@ -15,13 +15,13 @@
                 <option value="<%= element.idmarca %>" <%= element.idmarca == celular.idmarca ? 'selected' : '' %>><%= element.marca %></option>
               <% }) %>
             </select>
-            <label for="form-label">Marca</label>
+            <label for="marcas">Marca</label>
           </div>
         </div>
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="text" id="modelo" value="<%= celular.modelo %>" name="modelo" class="form-control" placeholder="Modelo" required>
-            <label for="form-label">Modelo</label>
+            <label for="modelo">Modelo</label>
           </div>
         </div>
       </div>
@@ -30,7 +30,7 @@
         <div class="col-md-4 mb-2">
           <div class="form-floating">
             <input type="text" id="color" value="<%= celular.color %>" name="color" class="form-control" placeholder="Color" required>
-            <label for="form-label">Color</label>
+            <label for="color">Color</label>
           </div>
         </div>
         <div class="col-md-4 mb-2">
@@ -42,7 +42,7 @@
               <option value="256GB" <%= celular.almacenamiento == '256GB' ? 'selected' : '' %> >256GB</option>
               <option value="512GB" <%= celular.almacenamiento == '512GB' ? 'selected' : '' %> >512GB</option>
             </select>
-            <label for="form-label">Almacenamiento</label>
+            <label for="almacenamiento">Almacenamiento</label>
           </div>
         </div>
         <div class="col-md-4 mb-2">
@@ -54,7 +54,7 @@
               <option value="8GB" <%= celular.ram == '8GB' ? 'selected' : '' %> >8GB</option>
               <option value="12GB" <%= celular.ram == '12GB' ? 'selected' : '' %> >12GB</option>
             </select>
-            <label for="form-label">Memoria RAM</label>
+            <label for="ram">Memoria RAM</label>
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="text" minlength="4" maxlength="4" pattern="[0-9]+" id="anio_lanzamiento" name="anio_lanzamiento" class="form-control" placeholder="Año de lanzamiento" value="<%= celular.anio_lanzamiento %>" required>
-            <label for="form-label">Año de lanzamiento</label>
+            <label for="anio_lanzamiento">Año de lanzamiento</label>
           </div>
         </div>
         <div class="col-md-6 mb-2">
@@ -72,7 +72,7 @@
               <option value="Nuevo" <%= celular.estado == 'Nuevo' ? 'selected' : '' %> >Nuevo</option>
               <option value="Usado" <%= celular.estado == 'Usado' ? 'selected' : '' %> >Usado</option>
             </select>
-            <label for="form-label">Estado</label>
+            <label for="estado">Estado</label>
           </div>
         </div>
       </div>
@@ -82,7 +82,7 @@
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="number" step="0.01" id="precio" name="precio" class="form-control" placeholder="Precio" value="<%= celular.precio %>" required>
-            <label for="form-label">Precio</label>
+            <label for="precio">Precio</label>
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@
         <div class="col-md-6 mb-2">
           <div class="form-floating">
             <input type="file" id="imagen" name="imagen" class="form-control" accept="image/*">
-            <label for="form-label">Imagen</label>
+            <label for="imagen">Imagen</label>
             <% if (celular.imagen) { %>
               <div class="mt-2">
                 <img src="/uploads/<%= celular.imagen %>" alt="Imagen actual" class="img-fluid" style="max-width: 200px;">
@@ -106,7 +106,7 @@
 
     <div class="card-footer">
       <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
-      <a href="/" class="btn btn-sm btn-secondary">Cancelar</a>
+      <a href="/celulares" class="btn btn-sm btn-secondary">Cancelar</a>
     </div>
   </div>
 </form>

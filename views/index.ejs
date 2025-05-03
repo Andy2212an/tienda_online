@@ -1,35 +1,37 @@
 <%- include('partials/header') %>
 
 <!-- Fila de filtros y orden -->
-<div class="row mb-4">
-  <!-- Categoría (botones) -->
-  <div class="col-12 col-md-4 mb-2">
-    <div class="btn-group w-100" role="group" aria-label="Categorias">
-      <button type="button" class="btn btn-outline-primary" data-category="Samsung">Samsung</button>
-      <button type="button" class="btn btn-outline-primary" data-category="Xiaomi">Xiaomi</button>
-      <button type="button" class="btn btn-outline-primary" data-category="Apple">Apple</button>
-      <button type="button" class="btn btn-outline-primary" data-category="Motorola">Motorola</button>
-      <!-- Añadir más categorías según lo necesario -->
-    </div>
+<div class="row mb-4 g-2">
+  <!-- Filtro por Marca -->
+  <div class="col-12 col-md-4">
+    <select id="filterMarca" class="form-select" aria-label="Filtrar por marca">
+      <option value="" <%= !category ? 'selected' : '' %>>Todos los modelos</option>
+      <% 
+        // Obtener marcas únicas para filtro
+        const marcasUnicas = [];
+        celulares.forEach(c => {
+          if (!marcasUnicas.includes(c.marca)) marcasUnicas.push(c.marca);
+        });
+        marcasUnicas.forEach(marca => { 
+      %>
+        <option value="<%= marca %>" <%= category === marca ? 'selected' : '' %>><%= marca %></option>
+      <% }) %>
+    </select>
   </div>
 
   <!-- Ordenar por Precio -->
-  <div class="col-12 col-md-4 mb-2">
-    <div class="dropdown w-100">
-      <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-        Ordenar por Precio
-      </button>
-      <ul class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-        <li><a class="dropdown-item" href="/celulares?sort=price_asc">Precio Ascendente</a></li>
-        <li><a class="dropdown-item" href="/celulares?sort=price_desc">Precio Descendente</a></li>
-      </ul>
-    </div>
+  <div class="col-12 col-md-4">
+    <select id="sortPrecio" class="form-select" aria-label="Ordenar por precio">
+      <option value="" <%= !sort ? 'selected' : '' %>>Ordenar por Precio</option>
+      <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Precio Ascendente</option>
+      <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Precio Descendente</option>
+    </select>
   </div>
 
   <!-- Buscador de Producto -->
-  <div class="col-12 col-md-4 mb-2">
-    <form class="d-flex w-100" action="/celulares" method="get">
-      <input class="form-control me-2" type="search" placeholder="Buscar Celular" aria-label="Buscar" name="query">
+  <div class="col-12 col-md-4">
+    <form id="searchForm" class="d-flex" action="/celulares" method="get" role="search">
+      <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar Celular" aria-label="Buscar" name="query" value="<%= query || '' %>" />
       <button class="btn btn-outline-success" type="submit">Buscar</button>
     </form>
   </div>
@@ -40,7 +42,7 @@
   <% celulares.forEach(celular => { %>
     <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
       <div class="card h-100">
-        <img src="<%= celular.imagen ? '/uploads/' + celular.imagen : '/uploads/default.jpg' %>" class="card-img-top" alt="<%= celular.modelo %>">
+        <img src="<%= celular.imagen ? '/uploads/' + celular.imagen : '/uploads/default.jpg' %>" class="card-img-top" alt="<%= celular.modelo %>" />
         <div class="card-body d-flex flex-column">
           <h5 class="card-title"><%= celular.marca %> - <%= celular.modelo %></h5>
           <p class="card-text"><strong>Color:</strong> <%= celular.color %></p>
@@ -50,8 +52,12 @@
           <p class="card-text"><strong>Estado:</strong> <%= celular.estado %></p>
           <p class="card-text"><strong>Precio:</strong> $<%= celular.precio %></p>
           <div class="mt-auto d-flex justify-content-between">
-            <a href="/edit/<%= celular.idcelular %>" class="btn btn-sm btn-info">Editar</a>
-            <a href="/delete/<%= celular.idcelular %>" class="btn btn-sm btn-danger delete">Eliminar</a>
+            <a href="/celulares/edit/<%= celular.idcelular %>" class="btn btn-sm btn-info">Editar</a>
+
+            <!-- Formulario para eliminar celular -->
+            <form action="/celulares/delete/<%= celular.idcelular %>" method="POST" class="formEliminar d-inline">
+              <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+            </form>
           </div>
         </div>
       </div>
@@ -61,40 +67,63 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const enlacesEliminar = document.querySelectorAll(".delete");
-
-    enlacesEliminar.forEach(enlace => {
-      enlace.addEventListener("click", (event) => {
-        event.preventDefault();
-
+    // Confirmación para eliminar
+    const formulariosEliminar = document.querySelectorAll(".formEliminar");
+    formulariosEliminar.forEach(form => {
+      form.addEventListener("submit", function(e) {
+        e.preventDefault();
         Swal.fire({
           title: 'Celulares',
           text: '¿Está seguro de eliminar?',
-          icon: 'question',
-          footer: 'SENATI - Ingeniería Software',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2980b9',
+          icon: 'warning',
           showCancelButton: true,
-          cancelButtonText: 'Cancelar',
-          cancelButtonColor: '#c0392b'
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
         }).then((result) => {
-          if (result.isConfirmed){
-            window.location.href = event.target.getAttribute("href");
+          if (result.isConfirmed) {
+            this.submit();
           }
         });
       });
     });
 
-    // Filtro por categoría
-    const categoriaButtons = document.querySelectorAll('[data-category]');
-    categoriaButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
-        const category = e.target.getAttribute('data-category');
-        window.location.href = `/celulares?category=${category}`;
-      });
+    // Manejar filtro por marca y orden por precio
+    const filterMarca = document.getElementById('filterMarca');
+    const sortPrecio = document.getElementById('sortPrecio');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+
+    function buildUrl() {
+      const params = new URLSearchParams();
+
+      if (filterMarca.value) {
+        params.append('category', filterMarca.value);
+      }
+      if (sortPrecio.value) {
+        params.append('sort', sortPrecio.value);
+      }
+      if (searchInput.value.trim()) {
+        params.append('query', searchInput.value.trim());
+      }
+      return '/celulares?' + params.toString();
+    }
+
+    filterMarca.addEventListener('change', () => {
+      window.location.href = buildUrl();
+    });
+
+    sortPrecio.addEventListener('change', () => {
+      window.location.href = buildUrl();
+    });
+
+    // Al enviar el formulario de búsqueda, incluir filtros actuales
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      window.location.href = buildUrl();
     });
   });
 </script>
 
 <%- include('partials/footer') %>
-

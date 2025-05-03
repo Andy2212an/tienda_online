@@ -1,19 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/database'); // Asegúrate de que la conexión esté configurada correctamente
+const db = require('../config/database');
 const multer = require('multer');
 const path = require('path');
+
 
 // Configurar almacenamiento de imágenes
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = 'public/uploads'; 
+    const uploadPath = 'public/uploads';
     cb(null, uploadPath);
   },
-  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)) // Nombre único para evitar conflictos
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|gif/;
@@ -27,7 +28,8 @@ const upload = multer({
     }
   }
 });
-// Mostrar todos los celulares con filtros
+
+// Mostrar todos los celulares con filtros (solo UNA vez definido)
 router.get('/', async (req, res) => {
   try {
     let query = `
@@ -53,7 +55,13 @@ router.get('/', async (req, res) => {
       params.push(req.query.category);
     }
 
-    // Ordenar por precio
+    // Si hay un término de búsqueda
+    if (req.query.query) {
+      query += (params.length ? ' AND' : ' WHERE') + ' C.modelo LIKE ?';
+      params.push('%' + req.query.query + '%');
+    }
+
+    // Ordenar por precio (debe ir después de filtros y búsqueda)
     if (req.query.sort) {
       if (req.query.sort === 'price_asc') {
         query += ' ORDER BY C.precio ASC';
@@ -62,63 +70,15 @@ router.get('/', async (req, res) => {
       }
     }
 
-    // Si hay un término de búsqueda
-    if (req.query.query) {
-      query += (params.length ? ' AND' : ' WHERE') + ' C.modelo LIKE ?';
-      params.push('%' + req.query.query + '%');
-    }
-
     const [celulares] = await db.query(query, params);
-    res.render('index', { celulares });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error al obtener los celulares');
-  }
-});
 
-// Mostrar todos los celulares con filtros
-router.get('/', async (req, res) => {
-  try {
-    let query = `
-      SELECT
-        C.idcelular,
-        M.marca,
-        C.modelo,
-        C.color,
-        C.almacenamiento,
-        C.ram,
-        C.anio_lanzamiento,
-        C.estado,
-        C.precio,
-        C.imagen
-      FROM celulares C
-      INNER JOIN marcas M ON C.idmarca = M.idmarca
-    `;
-    const params = [];
-
-    // Filtrar por categoría (marca)
-    if (req.query.category) {
-      query += ' WHERE M.marca = ?';
-      params.push(req.query.category);
-    }
-
-    // Ordenar por precio
-    if (req.query.sort) {
-      if (req.query.sort === 'price_asc') {
-        query += ' ORDER BY C.precio ASC';
-      } else if (req.query.sort === 'price_desc') {
-        query += ' ORDER BY C.precio DESC';
-      }
-    }
-
-    // Si hay un término de búsqueda
-    if (req.query.query) {
-      query += (params.length ? ' AND' : ' WHERE') + ' C.modelo LIKE ?';
-      params.push('%' + req.query.query + '%');
-    }
-
-    const [celulares] = await db.query(query, params);
-    res.render('index', { celulares });
+    // Pasar también los filtros para mantener estado en la vista
+    res.render('index', {
+      celulares,
+      category: req.query.category || '',
+      sort: req.query.sort || '',
+      query: req.query.query || ''
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al obtener los celulares');
@@ -145,7 +105,7 @@ router.get('/edit/:id', async (req, res) => {
     if (registro.length > 0)
       res.render('edit', { marcas: datos, celular: registro[0] });
     else
-      res.redirect('/');
+      res.redirect('/celulares');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al obtener los datos para editar');
@@ -156,19 +116,18 @@ router.get('/edit/:id', async (req, res) => {
 router.post('/create', upload.single('imagen'), async (req, res) => {
   try {
     const { marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio } = req.body;
-    const imagen = req.file ? req.file.filename : null; // Si hay imagen, tomamos su nombre
+    const imagen = req.file ? req.file.filename : null;
 
-    // Validación de datos
     if (!marcas || !modelo || !precio) {
       return res.status(400).send('Faltan campos requeridos');
     }
 
     await db.query(
       `INSERT INTO celulares (idmarca, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio, imagen) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio, imagen]
     );
-    res.redirect('/');
+    res.redirect('/celulares');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al guardar el celular');
@@ -179,24 +138,22 @@ router.post('/create', upload.single('imagen'), async (req, res) => {
 router.post('/edit/:id', upload.single('imagen'), async (req, res) => {
   try {
     const { marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio } = req.body;
-    let imagen = req.body.imagen; // Si no hay nueva imagen, se usa la anterior
+    let imagen = req.body.imagen;
 
-    // Si se sube una nueva imagen, actualizamos la imagen
     if (req.file) {
       imagen = req.file.filename;
     }
 
-    // Validación de campos
     if (!marcas || !modelo || !precio) {
       return res.status(400).send('Faltan campos requeridos');
     }
 
     await db.query(
       `UPDATE celulares SET idmarca=?, modelo=?, color=?, almacenamiento=?, ram=?, anio_lanzamiento=?, estado=?, precio=?, imagen=? 
-      WHERE idcelular=?`,
+       WHERE idcelular=?`,
       [marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio, imagen, req.params.id]
     );
-    res.redirect('/');
+    res.redirect('/celulares');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al actualizar el celular');
@@ -204,10 +161,34 @@ router.post('/edit/:id', upload.single('imagen'), async (req, res) => {
 });
 
 // Eliminar celular
+router.post('/delete/:id', async (req, res) => {
+  try {
+    // Si deseas eliminar la imagen también, puedes agregar esta lógica:
+    const [celular] = await db.query("SELECT imagen FROM celulares WHERE idcelular = ?", [req.params.id]);
+    if (celular.length > 0 && celular[0].imagen) {
+      const fs = require('fs');
+      const path = require('path');
+      const imagenPath = path.join(__dirname, '../public/uploads', celular[0].imagen);
+
+      if (fs.existsSync(imagenPath)) {
+        fs.unlinkSync(imagenPath); // Eliminar la imagen
+      }
+    }
+
+    // Eliminar el registro del celular
+    await db.query("DELETE FROM celulares WHERE idcelular = ?", [req.params.id]);
+    res.redirect('/celulares');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al eliminar el celular');
+  }
+});
+
+// Eliminar celular
 router.get('/delete/:id', async (req, res) => {
   try {
     await db.query("DELETE FROM celulares WHERE idcelular = ?", [req.params.id]);
-    res.redirect('/');
+    res.redirect('/celulares');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al eliminar el celular');
