@@ -1,11 +1,36 @@
-const express = require('express'); // Framework
-const router = express.Router(); // Rutas
-const db = require('../config/database'); // Acceso BD
+const express = require('express');
+const router = express.Router();
+const db = require('../config/database'); // Asegúrate de que la conexión esté configurada correctamente
+const multer = require('multer');
+const path = require('path');
 
-// Mostrar todos los celulares
+// Configurar almacenamiento de imágenes
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = 'public/uploads'; 
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)) // Nombre único para evitar conflictos
+});
+
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimeType = fileTypes.test(file.mimetype);
+
+    if (extname && mimeType) {
+      return cb(null, true);
+    } else {
+      cb('Error: Los archivos deben ser de tipo imagen (jpg, jpeg, png, gif)');
+    }
+  }
+});
+// Mostrar todos los celulares con filtros
 router.get('/', async (req, res) => {
   try {
-    const query = `
+    let query = `
       SELECT
         C.idcelular,
         M.marca,
@@ -14,28 +39,104 @@ router.get('/', async (req, res) => {
         C.almacenamiento,
         C.ram,
         C.anio_lanzamiento,
-        C.estado
+        C.estado,
+        C.precio,
+        C.imagen
       FROM celulares C
       INNER JOIN marcas M ON C.idmarca = M.idmarca
     `;
-    const [celulares] = await db.query(query);
+    const params = [];
+
+    // Filtrar por categoría (marca)
+    if (req.query.category) {
+      query += ' WHERE M.marca = ?';
+      params.push(req.query.category);
+    }
+
+    // Ordenar por precio
+    if (req.query.sort) {
+      if (req.query.sort === 'price_asc') {
+        query += ' ORDER BY C.precio ASC';
+      } else if (req.query.sort === 'price_desc') {
+        query += ' ORDER BY C.precio DESC';
+      }
+    }
+
+    // Si hay un término de búsqueda
+    if (req.query.query) {
+      query += (params.length ? ' AND' : ' WHERE') + ' C.modelo LIKE ?';
+      params.push('%' + req.query.query + '%');
+    }
+
+    const [celulares] = await db.query(query, params);
     res.render('index', { celulares });
   } catch (error) {
     console.error(error);
+    res.status(500).send('Error al obtener los celulares');
   }
 });
 
-// Mostrar formulario para crear celular
+// Mostrar todos los celulares con filtros
+router.get('/', async (req, res) => {
+  try {
+    let query = `
+      SELECT
+        C.idcelular,
+        M.marca,
+        C.modelo,
+        C.color,
+        C.almacenamiento,
+        C.ram,
+        C.anio_lanzamiento,
+        C.estado,
+        C.precio,
+        C.imagen
+      FROM celulares C
+      INNER JOIN marcas M ON C.idmarca = M.idmarca
+    `;
+    const params = [];
+
+    // Filtrar por categoría (marca)
+    if (req.query.category) {
+      query += ' WHERE M.marca = ?';
+      params.push(req.query.category);
+    }
+
+    // Ordenar por precio
+    if (req.query.sort) {
+      if (req.query.sort === 'price_asc') {
+        query += ' ORDER BY C.precio ASC';
+      } else if (req.query.sort === 'price_desc') {
+        query += ' ORDER BY C.precio DESC';
+      }
+    }
+
+    // Si hay un término de búsqueda
+    if (req.query.query) {
+      query += (params.length ? ' AND' : ' WHERE') + ' C.modelo LIKE ?';
+      params.push('%' + req.query.query + '%');
+    }
+
+    const [celulares] = await db.query(query, params);
+    res.render('index', { celulares });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al obtener los celulares');
+  }
+});
+
+// Formulario para crear celular
 router.get('/create', async (req, res) => {
   try {
     const [datos] = await db.query("SELECT * FROM marcas");
     res.render('create', { marcas: datos });
   } catch (error) {
     console.error(error);
+    res.status(500).send('Error al obtener marcas');
   }
 });
 
-// Mostrar formulario para editar celular
+// Formulario para editar celular
 router.get('/edit/:id', async (req, res) => {
   try {
     const [datos] = await db.query("SELECT * FROM marcas");
@@ -47,34 +148,58 @@ router.get('/edit/:id', async (req, res) => {
       res.redirect('/');
   } catch (error) {
     console.error(error);
+    res.status(500).send('Error al obtener los datos para editar');
   }
 });
 
 // Guardar nuevo celular
-router.post('/create', async (req, res) => {
+router.post('/create', upload.single('imagen'), async (req, res) => {
   try {
-    const { marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado } = req.body;
+    const { marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio } = req.body;
+    const imagen = req.file ? req.file.filename : null; // Si hay imagen, tomamos su nombre
+
+    // Validación de datos
+    if (!marcas || !modelo || !precio) {
+      return res.status(400).send('Faltan campos requeridos');
+    }
+
     await db.query(
-      `INSERT INTO celulares (idmarca, modelo, color, almacenamiento, ram, anio_lanzamiento, estado) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado]
+      `INSERT INTO celulares (idmarca, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio, imagen) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio, imagen]
     );
     res.redirect('/');
   } catch (error) {
     console.error(error);
+    res.status(500).send('Error al guardar el celular');
   }
 });
 
 // Actualizar celular
-router.post('/edit/:id', async (req, res) => {
+router.post('/edit/:id', upload.single('imagen'), async (req, res) => {
   try {
-    const { marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado } = req.body;
+    const { marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio } = req.body;
+    let imagen = req.body.imagen; // Si no hay nueva imagen, se usa la anterior
+
+    // Si se sube una nueva imagen, actualizamos la imagen
+    if (req.file) {
+      imagen = req.file.filename;
+    }
+
+    // Validación de campos
+    if (!marcas || !modelo || !precio) {
+      return res.status(400).send('Faltan campos requeridos');
+    }
+
     await db.query(
-      `UPDATE celulares SET idmarca=?, modelo=?, color=?, almacenamiento=?, ram=?, anio_lanzamiento=?, estado=? WHERE idcelular=?`,
-      [marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, req.params.id]
+      `UPDATE celulares SET idmarca=?, modelo=?, color=?, almacenamiento=?, ram=?, anio_lanzamiento=?, estado=?, precio=?, imagen=? 
+      WHERE idcelular=?`,
+      [marcas, modelo, color, almacenamiento, ram, anio_lanzamiento, estado, precio, imagen, req.params.id]
     );
     res.redirect('/');
   } catch (error) {
     console.error(error);
+    res.status(500).send('Error al actualizar el celular');
   }
 });
 
@@ -85,7 +210,9 @@ router.get('/delete/:id', async (req, res) => {
     res.redirect('/');
   } catch (error) {
     console.error(error);
+    res.status(500).send('Error al eliminar el celular');
   }
 });
 
 module.exports = router;
+

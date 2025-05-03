@@ -1,44 +1,67 @@
 <%- include('partials/header') %>
 
-<div class="table-responsive">
-  <table class="table table-sm">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Marca</th>
-        <th>Modelo</th>
-        <th>Color</th>
-        <th>Almacenamiento</th>
-        <th>RAM</th>
-        <th>Año</th>
-        <th>Estado</th>
-        <th>Operaciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% celulares.forEach(celular => { %>
-      <tr>
-        <td><%= celular.idcelular %></td>
-        <td><%= celular.marca %></td>
-        <td><%= celular.modelo %></td>
-        <td><%= celular.color %></td>
-        <td><%= celular.almacenamiento %></td>
-        <td><%= celular.ram %></td>
-        <td><%= celular.anio_lanzamiento %></td>
-        <td><%= celular.estado %></td>
-        <td>
-          <a href="/edit/<%= celular.idcelular %>" class="btn btn-sm btn-info">Editar</a>
-          <a href="/delete/<%= celular.idcelular %>" class="btn btn-sm btn-danger delete">Eliminar</a>
-        </td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
+<!-- Fila de filtros y orden -->
+<div class="row mb-4">
+  <!-- Categoría (botones) -->
+  <div class="col-12 col-md-4 mb-2">
+    <div class="btn-group w-100" role="group" aria-label="Categorias">
+      <button type="button" class="btn btn-outline-primary" data-category="Samsung">Samsung</button>
+      <button type="button" class="btn btn-outline-primary" data-category="Xiaomi">Xiaomi</button>
+      <button type="button" class="btn btn-outline-primary" data-category="Apple">Apple</button>
+      <button type="button" class="btn btn-outline-primary" data-category="Motorola">Motorola</button>
+      <!-- Añadir más categorías según lo necesario -->
+    </div>
+  </div>
+
+  <!-- Ordenar por Precio -->
+  <div class="col-12 col-md-4 mb-2">
+    <div class="dropdown w-100">
+      <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+        Ordenar por Precio
+      </button>
+      <ul class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
+        <li><a class="dropdown-item" href="/celulares?sort=price_asc">Precio Ascendente</a></li>
+        <li><a class="dropdown-item" href="/celulares?sort=price_desc">Precio Descendente</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Buscador de Producto -->
+  <div class="col-12 col-md-4 mb-2">
+    <form class="d-flex w-100" action="/celulares" method="get">
+      <input class="form-control me-2" type="search" placeholder="Buscar Celular" aria-label="Buscar" name="query">
+      <button class="btn btn-outline-success" type="submit">Buscar</button>
+    </form>
+  </div>
+</div>
+
+<!-- Cards de Celulares -->
+<div class="row">
+  <% celulares.forEach(celular => { %>
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+      <div class="card h-100">
+        <img src="<%= celular.imagen ? '/uploads/' + celular.imagen : '/uploads/default.jpg' %>" class="card-img-top" alt="<%= celular.modelo %>">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title"><%= celular.marca %> - <%= celular.modelo %></h5>
+          <p class="card-text"><strong>Color:</strong> <%= celular.color %></p>
+          <p class="card-text"><strong>Almacenamiento:</strong> <%= celular.almacenamiento %></p>
+          <p class="card-text"><strong>RAM:</strong> <%= celular.ram %></p>
+          <p class="card-text"><strong>Año:</strong> <%= celular.anio_lanzamiento %></p>
+          <p class="card-text"><strong>Estado:</strong> <%= celular.estado %></p>
+          <p class="card-text"><strong>Precio:</strong> $<%= celular.precio %></p>
+          <div class="mt-auto d-flex justify-content-between">
+            <a href="/edit/<%= celular.idcelular %>" class="btn btn-sm btn-info">Editar</a>
+            <a href="/delete/<%= celular.idcelular %>" class="btn btn-sm btn-danger delete">Eliminar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% }) %>
 </div>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const enlacesEliminar = document.querySelectorAll(".delete")
+    const enlacesEliminar = document.querySelectorAll(".delete");
 
     enlacesEliminar.forEach(enlace => {
       enlace.addEventListener("click", (event) => {
@@ -56,12 +79,22 @@
           cancelButtonColor: '#c0392b'
         }).then((result) => {
           if (result.isConfirmed){
-            window.location.href = event.target.getAttribute("href")
+            window.location.href = event.target.getAttribute("href");
           }
         });
+      });
+    });
+
+    // Filtro por categoría
+    const categoriaButtons = document.querySelectorAll('[data-category]');
+    categoriaButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        const category = e.target.getAttribute('data-category');
+        window.location.href = `/celulares?category=${category}`;
       });
     });
   });
 </script>
 
 <%- include('partials/footer') %>
+
