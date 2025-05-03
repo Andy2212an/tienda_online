@@ -31,11 +31,11 @@
   <!-- Buscador de Producto -->
   <div class="col-12 col-md-4">
     <form id="searchForm" class="d-flex" action="/celulares" method="get" role="search">
-      <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar Celular" aria-label="Buscar" name="query" value="<%= query || '' %>" />
+      <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar Celular"
+        aria-label="Buscar" name="query" value="<%= query || '' %>" />
       <button class="btn btn-outline-success" type="submit">Buscar</button>
     </form>
   </div>
-</div>
 
 <!-- Cards de Celulares -->
 <div class="row">
@@ -54,7 +54,6 @@
           <div class="mt-auto d-flex justify-content-between">
             <a href="/celulares/edit/<%= celular.idcelular %>" class="btn btn-sm btn-info">Editar</a>
 
-            <!-- Formulario para eliminar celular -->
             <form action="/celulares/delete/<%= celular.idcelular %>" method="POST" class="formEliminar d-inline">
               <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
             </form>

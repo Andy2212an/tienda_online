@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../config/database');
 const multer = require('multer');
 const path = require('path');
-
+const fs = require('fs');
 
 // Configurar almacenamiento de imágenes
 const storage = multer.diskStorage({
@@ -29,7 +29,7 @@ const upload = multer({
   }
 });
 
-// Mostrar todos los celulares con filtros (solo UNA vez definido)
+// Mostrar todos los celulares con filtros (categoría, búsqueda, orden)
 router.get('/', async (req, res) => {
   try {
     let query = `
@@ -47,32 +47,46 @@ router.get('/', async (req, res) => {
       FROM celulares C
       INNER JOIN marcas M ON C.idmarca = M.idmarca
     `;
+    const conditions = [];
     const params = [];
 
-    // Filtrar por categoría (marca)
+    // Filtro por marca
     if (req.query.category) {
-      query += ' WHERE M.marca = ?';
+      conditions.push('M.marca = ?');
       params.push(req.query.category);
     }
 
-    // Si hay un término de búsqueda
+    // Filtro por múltiples campos de búsqueda
     if (req.query.query) {
-      query += (params.length ? ' AND' : ' WHERE') + ' C.modelo LIKE ?';
-      params.push('%' + req.query.query + '%');
+      const q = '%' + req.query.query + '%';
+      conditions.push(`
+        (
+          M.marca LIKE ? OR
+          C.modelo LIKE ? OR
+          C.color LIKE ? OR
+          C.almacenamiento LIKE ? OR
+          C.ram LIKE ? OR
+          C.anio_lanzamiento LIKE ? OR
+          C.estado LIKE ?
+        )
+      `);
+      params.push(q, q, q, q, q, q, q);
     }
 
-    // Ordenar por precio (debe ir después de filtros y búsqueda)
-    if (req.query.sort) {
-      if (req.query.sort === 'price_asc') {
-        query += ' ORDER BY C.precio ASC';
-      } else if (req.query.sort === 'price_desc') {
-        query += ' ORDER BY C.precio DESC';
-      }
+    // Agregar WHERE si hay condiciones
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    // Ordenar por precio
+    if (req.query.sort === 'price_asc') {
+      query += ' ORDER BY C.precio ASC';
+    } else if (req.query.sort === 'price_desc') {
+      query += ' ORDER BY C.precio DESC';
     }
 
     const [celulares] = await db.query(query, params);
 
-    // Pasar también los filtros para mantener estado en la vista
     res.render('index', {
       celulares,
       category: req.query.category || '',
@@ -96,22 +110,6 @@ router.get('/create', async (req, res) => {
   }
 });
 
-// Formulario para editar celular
-router.get('/edit/:id', async (req, res) => {
-  try {
-    const [datos] = await db.query("SELECT * FROM marcas");
-    const [registro] = await db.query("SELECT * FROM celulares WHERE idcelular = ?", [req.params.id]);
-
-    if (registro.length > 0)
-      res.render('edit', { marcas: datos, celular: registro[0] });
-    else
-      res.redirect('/celulares');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error al obtener los datos para editar');
-  }
-});
-
 // Guardar nuevo celular
 router.post('/create', upload.single('imagen'), async (req, res) => {
   try {
@@ -131,6 +129,22 @@ router.post('/create', upload.single('imagen'), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al guardar el celular');
+  }
+});
+
+// Formulario para editar celular
+router.get('/edit/:id', async (req, res) => {
+  try {
+    const [datos] = await db.query("SELECT * FROM marcas");
+    const [registro] = await db.query("SELECT * FROM celulares WHERE idcelular = ?", [req.params.id]);
+
+    if (registro.length > 0)
+      res.render('edit', { marcas: datos, celular: registro[0] });
+    else
+      res.redirect('/celulares');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al obtener los datos para editar');
   }
 });
 
@@ -160,22 +174,17 @@ router.post('/edit/:id', upload.single('imagen'), async (req, res) => {
   }
 });
 
-// Eliminar celular
+// Eliminar celular (POST)
 router.post('/delete/:id', async (req, res) => {
   try {
-    // Si deseas eliminar la imagen también, puedes agregar esta lógica:
     const [celular] = await db.query("SELECT imagen FROM celulares WHERE idcelular = ?", [req.params.id]);
     if (celular.length > 0 && celular[0].imagen) {
-      const fs = require('fs');
-      const path = require('path');
       const imagenPath = path.join(__dirname, '../public/uploads', celular[0].imagen);
-
       if (fs.existsSync(imagenPath)) {
-        fs.unlinkSync(imagenPath); // Eliminar la imagen
+        fs.unlinkSync(imagenPath);
       }
     }
 
-    // Eliminar el registro del celular
     await db.query("DELETE FROM celulares WHERE idcelular = ?", [req.params.id]);
     res.redirect('/celulares');
   } catch (error) {
@@ -184,7 +193,7 @@ router.post('/delete/:id', async (req, res) => {
   }
 });
 
-// Eliminar celular
+// Eliminar celular (GET) - opcional
 router.get('/delete/:id', async (req, res) => {
   try {
     await db.query("DELETE FROM celulares WHERE idcelular = ?", [req.params.id]);
@@ -196,3 +205,4 @@ router.get('/delete/:id', async (req, res) => {
 });
 
 module.exports = router;
+
