@@ -87,5 +87,19 @@ Sigue estos pasos para descargar y ejecutar el proyecto en tu máquina local:
   ```
 - Asegúrate de que la base de datos configurada en `config/database.js` esté disponible y correctamente configurada.
 
+## 🔍 Uso del buscador
+
+El buscador está diseñado para filtrar los celulares disponibles en el catálogo. Puedes buscar utilizando **detalles específicos** de un celular. Asegúrate de ingresar solo **uno de los siguientes campos** en el buscador para que funcione correctamente:
+
+- **Almacenamiento**: Por ejemplo, "128GB".
+- **RAM**: Por ejemplo, "8GB".
+- **Año**: Por ejemplo, "2023".
+- **Estado**: Por ejemplo, "Nuevo" o "Usado".
+- **Precio**: Por ejemplo, "999.99".
+- **Marca**: Por ejemplo, "Samsung".
+- **Modelo**: Por ejemplo, "Galaxy S22".
+
+Si ingresas más de un campo a la vez, el buscador podría no funcionar como se espera. Usa un solo criterio para obtener resultados precisos.
+
 El entorno ya está configurado correctamente.
 
